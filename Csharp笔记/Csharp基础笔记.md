@@ -607,6 +607,256 @@ class Person{
 
 - 复制集合(Copy Collection)
 
+#### 成员属性
+
+- 用于保护成员变量
+
+- 为成员属性的获取和赋值添加逻辑处理
+
+- 解决3p(public,private,protected)局限性
+
+- 属性可以让成员变量在外部只能获取 不能修改 或者 只能修改 不能获取
+
+tips：在VS中，输入prop按两下Tap可自动生成属性
+
+```csharp
+//语法    使用帕斯卡命名
+访问修饰符 属性类型 属性名{ get{} set{} }
+class Person{
+    private string name;
+    private int age;
+    //使用帕斯卡命名
+    public string Name{
+        //get set前可加访问修饰符，默认使用public
+        //不能都让set get的访问权限都低于属性的权限
+        //get set可以只有一个
+        get{
+            //可添加一些逻辑规则
+            return name; 
+        }
+        set{
+            //可添加一些逻辑规则
+            //value关键字用于表示外部传入的值
+            name = value;
+        }
+    }
+    //自动属性，外部能得不能改的特征，前提是没什么特殊处理，那可以用
+    //相当于private Height;    但是有了外部能得不能改的特征
+    public float Height{
+        get;
+        private set;
+    }
+}
+//使用
+Person p = new Person();
+p.Name = "Alex";    //会调用属性中的set，并且value == "Alex"
+Console.WriteLine(p.Name);    //"Alex"，调用的是属性中的get，返回name
+```
+
+#### 索引器
+
+让对象可以像数组一样通过索引访问其中元素，使程序看起来更直观，更容易编写
+
+比较适用于在类中有数组变量时使用，可以方便的访问和进行逻辑处理
+
+注意：索引器可以重载，结构体里面也是支持索引器的
+
+```csharp
+访问修饰符 返回值 this[参数列表] { get{} set{} }
+
+class Student
+{
+    private int age;
+    private float unityScore;
+    private float cSharpScore;
+    private string sex;
+    private Student[] friends;
+        //索引器
+        public Student this[int index]
+        {
+            get
+            {
+                if (friends == null || friends.Length-1 < index)
+                {
+                    return null;
+                }
+                return friends[index];
+            }
+            set
+            {
+                friends[index] = value;
+            }
+        }
+}
+Student s = new Student();
+```
+
+#### 静态成员
+
+用static修饰的成员变量、方法、属性等，称为静态成员。
+
+静态变量 一般用于常用的唯一变量的声明，方便别人获取的对象声明，如PI=3.14159
+
+静态方法 常用的唯一方法声明，如相同规则的数学计算函数
+
+特点：
+
+- 程序开始运行时就会分配内存空间，所以可以直接用类名点出使用
+
+- 只要使用了静态成员，直到程序结束时内存空间才会被释放
+
+- 所以静态成员就会有自己唯一的一个“内存小空间”，使得成员变量有了唯一性
+
+- 任何地方使用都是用的小房间里的内容，改变了它也是改变的小房间内容
+
+注意：
+
+- 静态函数中不能使用非静态成员
+
+```csharp
+class Person {
+    public static int num = 10;
+    public static void Speak(){
+        Console.WriteLine("Hello static");
+    }
+}
+//使用
+Console.WriteLine(Person.num);    // 10
+Console.WriteLine(Person.Speak());    // Hello static
+```
+
+与常量的区别：
+
+- const可以理解为特殊的static
+
+- 相同点：他们都能通过类名点出使用
+
+- 不同点：const必须初始化，而且不能修改。const只能修饰变量。const一定写在访问修饰符后面
+
+#### 静态类
+
+用static修饰的类
+
+特点：只能包含静态成员，不能被实例化。
+
+作用：将常用的静态成员写在静态类中，方便使用，静态类不能被实例化，体现工具类的唯一性。例如Console就是一个静态类
+
+```csharp
+static class Person {
+    public static void Speak(){
+        Console.WriteLine("Hello Static Class");
+    }
+}
+```
+
+##### 静态构造函数
+
+构造函数中加上static
+
+特点：静态类和普通类都可以有，不能使用访问修饰符，不能有参数，只会自动调用一次
+
+作用：在静态构造函数中初始化 静态变量
+
+```csharp
+static class StaticClass{
+    public static int testInt = 100;
+    public static int testInt2 = 100;
+    static StaticClass(){
+        Console.WriteLine("只会自动调用一次");
+    }
+}
+//使用
+StaticClass.testInt
+StaticClass.testIn2
+//输出
+"只会自动调用一次"
+100
+200
+
+
+class Test{
+    public static int num1 = 10;
+    public int num2 = 10;
+    static Test(){
+        Console.WriteLine("静态构造");
+    }
+    public Test(){
+        Console.WriteLine("普通构造");
+    }
+}
+//使用
+Test t = new Test();
+t.num;
+//输出
+"静态构造"
+10
+"普通构造"
+--------------------------------
+//使用
+Test.num1
+//输出
+"静态构造"
+10
+```
+
+#### 拓展方法
+
+为现有非静态 变量类型 添加 新方法（类也是一种变量类型）
+
+作用：
+
+- 提升程序拓展性
+
+- 不需要在对象中重新写方法
+
+- 不需要继承来添加方法
+
+- 为别人封装的类型写额外的方法
+
+特点：
+
+- 一定写在静态类中
+
+- 一定是个静态函数
+
+- 第一个参数为拓展目标
+
+- 第一个参数用this修饰
+
+- 支持重载
+
+```csharp
+//访问修饰符 static 返回值 函数名(this 拓展类名 参数名，参数类型 参数名,...)
+static class Tools{
+    //为int拓展了一个成员方法
+    //成员方法 是需要 实例化对象后 才 能使用的
+    //value 代表 使用该方法的 实例化对象
+    public static int AddOne(this int value){
+        return value + 1;
+    }
+    public static int AddOne(this int value, int a, int b)
+    {
+        return value + a + b;
+    }
+    public static void Fun3(this Test t)
+    {
+        Console.WriteLine("为test拓展的方法");
+    }
+}
+class Test {
+    public int i = 10;
+    public void Fun1(){
+        Console.WriteLine("123");
+    }
+}
+//使用
+int i = 10;
+i.AddOne()    // 11
+i.AddOne(3,4)    // 17
+Test t = new Test();
+t.Fun3();    //"为test拓展的方法"
+```
+
 ### 继承
 
 复用封装对象的代码，儿子继承父亲，复用现成代码
